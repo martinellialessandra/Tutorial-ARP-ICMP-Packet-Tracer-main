@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Packet Tracer - Analisi Pacchetti ICMP/Ping</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 15px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        h2 {
+            color: #2980b9;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        h3 {
+            color: #16a085;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .step {
+            background: #ecf0f1;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .step-title {
+            display: inline-block;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .note strong {
+            color: #856404;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box strong {
+            color: #0c5460;
+        }
+        
+        .warning {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .warning strong {
+            color: #721c24;
+        }
+        
+        code {
+            background: #f8f9fa;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .topology-diagram {
+            background: #fff;
+            border: 2px solid #3498db;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .device {
+            display: inline-block;
+            padding: 15px 25px;
+            margin: 10px;
+            background: #3498db;
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .connection {
+            display: inline-block;
+            color: #e74c3c;
+            font-size: 1.5em;
+            margin: 0 10px;
+        }
+        
+        .screenshot-placeholder {
+            background: #e8e8e8;
+            border: 2px dashed #999;
+            padding: 60px;
+            margin: 20px 0;
+            text-align: center;
+            border-radius: 10px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .packet-structure {
+            background: #f8f9fa;
+            border: 2px solid #6c757d;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .layer {
+            margin: 10px 0;
+            padding: 15px;
+            border-left: 4px solid #6c757d;
+        }
+        
+        .layer-1 { border-left-color: #dc3545; background: #ffe5e5; }
+        .layer-2 { border-left-color: #fd7e14; background: #fff4e5; }
+        .layer-3 { border-left-color: #ffc107; background: #fffaeb; }
+        .layer-4 { border-left-color: #28a745; background: #e8f5e9; }
+        
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #7f8c8d;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📡 Tutorial Packet Tracer</h1>
+        <p class="subtitle">Analisi dei Pacchetti TCP/IP e ICMP (Ping) tra Due PC</p>
+        
+        <div class="info-box">
+            <strong>🎯 Obiettivo del Tutorial:</strong> Imparare a utilizzare Cisco Packet Tracer per analizzare il contenuto dei pacchetti dati che vengono scambiati durante un comando ping tra due computer collegati tramite switch.
+        </div>
+
+        <h2>📋 Informazioni Preliminari</h2>
+        
+        <h3>Scenario di Rete</h3>
+        <div class="topology-diagram">
+            <div class="device">PC1<br>192.168.0.10/24</div>
+            <span class="connection">━━━</span>
+            <div class="device">Switch</div>
+            <span class="connection">━━━</span>
+            <div class="device">PC2<br>192.168.0.20/24</div>
+        </div>
+
+        <table>
+            <tr>
+                <th>Dispositivo</th>
+                <th>Indirizzo IP</th>
+                <th>Subnet Mask</th>
+                <th>Tipo Connessione</th>
+            </tr>
+            <tr>
+                <td>PC1</td>
+                <td>192.168.0.10</td>
+                <td>255.255.255.0 (/24)</td>
+                <td>Ethernet (Copper Straight-Through)</td>
+            </tr>
+            <tr>
+                <td>Switch</td>
+                <td>N/A (Layer 2)</td>
+                <td>N/A</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>PC2</td>
+                <td>192.168.0.20</td>
+                <td>255.255.255.0 (/24)</td>
+                <td>Ethernet (Copper Straight-Through)</td>
+            </tr>
+        </table>
+
+        <div class="note">
+            <strong>📝 Nota Importante:</strong> Il comando ping utilizza il protocollo ICMP (Internet Control Message Protocol), che opera a livello di rete (Layer 3) e viene incapsulato in pacchetti IP. Anche se l'esercizio parla di TCP/IP, il ping usa specificatamente ICMP, non TCP.
+        </div>
+
+        <h2>🔧 Requisiti</h2>
+        <ul>
+            <li><strong>Software:</strong> Cisco Packet Tracer (versione 7.x o superiore)</li>
+            <li><strong>Conoscenze base:</strong> Modello OSI/TCP-IP, indirizzi IP, subnet mask</li>
+            <li><strong>Tempo stimato:</strong> 30-45 minuti</li>
+        </ul>
+
+        <h2>📚 Procedura Passo-Passo</h2>
+
+        <!-- PASSO 1 -->
+        <div class="step">
+            <div>
+                <span class="step-number">1</span>
+                <span class="step-title">Apertura di Packet Tracer e Creazione della Topologia</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Apri <strong>Cisco Packet Tracer</strong></li>
+                <li>Nella barra inferiore, seleziona la categoria <strong>"End Devices"</strong> (dispositivi finali)</li>
+                <li>Clicca sull'icona del <strong>PC</strong> e trascinala nell'area di lavoro due volte per creare PC1 e PC2</li>
+                <li>Seleziona la categoria <strong>"Network Devices"</strong> → <strong>"Switches"</strong></li>
+                <li>Trascina uno <strong>Switch 2960</strong> (o simile) nell'area di lavoro, posizionandolo tra i due PC</li>
+            </ol>
+            
+            <div class="screenshot-placeholder">
+                📸 Screenshot: Area di lavoro con 2 PC e 1 Switch posizionati
+            </div>
+        </div>
+
+        <!-- PASSO 2 -->
+        <div class="step">
+            <div>
+                <span class="step-number">2</span>
+                <span class="step-title">Collegamento dei Dispositivi</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Clicca sull'icona del <strong>fulmine</strong> (Connections) nella barra inferiore</li>
+                <li>Seleziona il cavo <strong>"Copper Straight-Through"</strong> (linea nera continua)</li>
+                <li>Clicca su <strong>PC1</strong>, seleziona la porta <code>FastEthernet0</code></li>
+                <li>Clicca sullo <strong>Switch</strong>, seleziona una porta libera (es. <code>FastEthernet0/1</code>)</li>
+                <li>Ripeti per collegare <strong>PC2</strong> allo switch sulla porta <code>FastEthernet0/2</code></li>
+            </ol>
+            
+            <div class="info-box">
+                <strong>💡 Suggerimento:</strong> I pallini alle estremità dei cavi diventeranno verdi quando la connessione è attiva (potrebbero impiegare qualche secondo).
+            </div>
+            
+            <div class="screenshot-placeholder">
+                📸 Screenshot: Topologia completa con cavi collegati e pallini verdi
+            </div>
+        </div>
+
+        <!-- PASSO 3 -->
+        <div class="step">
+            <div>
+                <span class="step-number">3</span>
+                <span class="step-title">Configurazione di PC1</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Clicca su <strong>PC1</strong> per aprire la finestra di configurazione</li>
+                <li>Vai alla scheda <strong>"Desktop"</strong></li>
+                <li>Clicca su <strong>"IP Configuration"</strong></li>
+                <li>Inserisci i seguenti valori:
+                    <div class="code-block">
+IP Address: 192.168.0.10
+Subnet Mask: 255.255.255.0
+Default Gateway: (lascia vuoto o 192.168.0.1)
+                    </div>
+                </li>
+                <li>Chiudi la finestra di PC1</li>
+            </ol>
+            
+            <div class="screenshot-placeholder">
+                📸 Screenshot: Finestra IP Configuration di PC1 con i valori inseriti
+            </div>
+        </div>
+
+        <!-- PASSO 4 -->
+        <div class="step">
+            <div>
+                <span class="step-number">4</span>
+                <span class="step-title">Configurazione di PC2</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Clicca su <strong>PC2</strong> per aprire la finestra di configurazione</li>
+                <li>Vai alla scheda <strong>"Desktop"</strong></li>
+                <li>Clicca su <strong>"IP Configuration"</strong></li>
+                <li>Inserisci i seguenti valori:
+                    <div class="code-block">
+IP Address: 192.168.0.20
+Subnet Mask: 255.255.255.0
+Default Gateway: (lascia vuoto o 192.168.0.1)
+                    </div>
+                </li>
+                <li>Chiudi la finestra di PC2</li>
+            </ol>
+            
+            <div class="note">
+                <strong>📝 Verifica:</strong> Assicurati che entrambi i PC abbiano la subnet mask corretta (255.255.255.0) e siano nella stessa rete (192.168.0.0/24).
+            </div>
+        </div>
+
+        <!-- PASSO 5 -->
+        <div class="step">
+            <div>
+                <span class="step-number">5</span>
+                <span class="step-title">Attivazione della Modalità Simulazione</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Nell'angolo in basso a destra di Packet Tracer, clicca sul pulsante <strong>"Simulation"</strong> (icona con cronometro)</li>
+                <li>Si aprirà il pannello di simulazione sulla destra dello schermo</li>
+                <li>Verifica che la modalità sia passata da <strong>"Realtime"</strong> a <strong>"Simulation"</strong></li>
+            </ol>
+            
+            <div class="info-box">
+                <strong>💡 Cos'è la Modalità Simulazione?</strong><br>
+                La modalità simulazione permette di visualizzare passo-passo il movimento dei pacchetti attraverso la rete, consentendo l'analisi dettagliata di ogni fase della comunicazione.
+            </div>
+            
+            <div class="screenshot-placeholder">
+                📸 Screenshot: Interfaccia con modalità Simulation attiva e pannello Event List visibile
+            </div>
+        </div>
+
+        <!-- PASSO 6 -->
+        <div class="step">
+            <div>
+                <span class="step-number">6</span>
+                <span class="step-title">Configurazione dei Filtri di Simulazione</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Nel pannello di simulazione, clicca su <strong>"Edit Filters"</strong></li>
+                <li>Deseleziona tutti i protocolli cliccando su <strong>"Show None"</strong></li>
+                <li>Seleziona manualmente solo:
+                    <ul>
+                        <li><code>ICMP</code> (protocollo usato dal ping)</li>
+                        <li><code>ARP</code> (necessario per la risoluzione degli indirizzi MAC)</li>
+                    </ul>
+                </li>
+                <li>Chiudi la finestra dei filtri</li>
+            </ol>
+            
+            <div class="note">
+                <strong>📝 Perché filtrare?</strong> Filtrare i protocolli permette di concentrarsi solo sul traffico rilevante, evitando confusione con altri pacchetti che potrebbero transitare nella rete.
+            </div>
+        </div>
+
+        <!-- PASSO 7 -->
+        <div class="step">
+            <div>
+                <span class="step-number">7</span>
+                <span class="step-title">Esecuzione del Comando Ping</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Clicca su <strong>PC1</strong></li>
+                <li>Vai alla scheda <strong>"Desktop"</strong></li>
+                <li>Clicca su <strong>"Command Prompt"</strong></li>
+                <li>Nel prompt dei comandi, digita:
+                    <div class="code-block">
+ping 192.168.0.20
+                    </div>
+                </li>
+                <li>Premi <strong>Invio</strong></li>
+                <li>Osserva che nella finestra del prompt non appare immediatamente nulla (siamo in modalità simulazione)</li>
+                <li>Non chiudere la finestra del Command Prompt</li>
+            </ol>
+            
+            <div class="screenshot-placeholder">
+                📸 Screenshot: Command Prompt di PC1 con il comando ping digitato
+            </div>
+        </div>
+
+        <!-- PASSO 8 -->
+        <div class="step">
+            <div>
+                <span class="step-number">8</span>
+                <span class="step-title">Analisi dei Pacchetti nella Simulazione</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Torna alla visualizzazione della topologia</li>
+                <li>Nel pannello <strong>"Event List"</strong> sulla destra, vedrai apparire gli eventi dei pacchetti</li>
+                <li>Clicca sul pulsante <strong>"Auto Capture / Play"</strong> oppure <strong>"Capture / Forward"</strong> per avanzare passo dopo passo</li>
+                <li>Osserva i pacchetti che si muovono dalla rete:
+                    <ul>
+                        <li>Prima vedrai pacchetti <strong>ARP</strong> (per scoprire l'indirizzo MAC di PC2)</li>
+                        <li>Poi vedrai pacchetti <strong>ICMP Echo Request</strong> (ping in uscita da PC1)</li>
+                        <li>Infine vedrai pacchetti <strong>ICMP Echo Reply</strong> (risposta di PC2)</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="info-box">
+                <strong>💡 Sequenza tipica:</strong><br>
+                1. ARP Request (broadcast) da PC1<br>
+                2. ARP Reply da PC2<br>
+                3. ICMP Echo Request da PC1 a PC2<br>
+                4. ICMP Echo Reply da PC2 a PC1
+            </div>
+            
+            <div class="screenshot-placeholder">
+                📸 Screenshot: Event List con la sequenza di pacchetti ARP e ICMP visibili
+            </div>
+        </div>
+
+        <!-- PASSO 9 -->
+        <div class="step">
+            <div>
+                <span class="step-number">9</span>
+                <span class="step-title">Analisi Dettagliata del Pacchetto ICMP</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Nell'Event List, individua un evento <strong>ICMP</strong></li>
+                <li>Clicca sul <strong>quadratino colorato</strong> nella colonna "Info" dell'evento ICMP</li>
+                <li>Si aprirà la finestra <strong>"PDU Information"</strong> (Protocol Data Unit)</li>
+                <li>In questa finestra vedrai:
+                    <ul>
+                        <li><strong>OSI Model:</strong> visualizzazione stratificata del pacchetto</li>
+                        <li><strong>Outbound PDU Details:</strong> dettagli del pacchetto in uscita</li>
+                        <li><strong>Inbound PDU Details:</strong> dettagli del pacchetto in entrata (se presente)</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="screenshot-placeholder">
+                📸 Screenshot: Finestra PDU Information aperta con i layer del modello OSI visibili
+            </div>
+        </div>
+
+        <!-- PASSO 10 -->
+        <div class="step">
+            <div>
+                <span class="step-number">10</span>
+                <span class="step-title">Esaminare i Layer del Modello OSI</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <p>Nella finestra PDU Information, esplora ogni layer cliccando sulle schede:</p>
+            
+            <h3>Layer 1 - Physical Layer</h3>
+            <div class="layer layer-1">
+                <strong>Informazioni visualizzate:</strong>
+                <ul>
+                    <li>Porta fisica utilizzata</li>
+                    <li>Tipo di mezzo trasmissivo (Copper)</li>
+                    <li>Stato del link</li>
+                </ul>
+            </div>
+
+            <h3>Layer 2 - Data Link Layer (Ethernet)</h3>
+            <div class="layer layer-2">
+                <strong>Informazioni visualizzate:</strong>
+                <ul>
+                    <li><strong>Destination MAC Address:</strong> Indirizzo MAC di destinazione (PC2)</li>
+                    <li><strong>Source MAC Address:</strong> Indirizzo MAC sorgente (PC1)</li>
+                    <li><strong>Ethernet Type:</strong> 0x0800 (IPv4)</li>
+                </ul>
+                <div class="code-block">
+Esempio:
+DEST MAC: 0060.5C4E.1234
+SRC MAC: 0001.C7A2.5678
+TYPE: 0x0800
+                </div>
+            </div>
+
+            <h3>Layer 3 - Network Layer (IP)</h3>
+            <div class="layer layer-3">
+                <strong>Informazioni visualizzate:</strong>
+                <ul>
+                    <li><strong>Source IP Address:</strong> 192.168.0.10 (PC1)</li>
+                    <li><strong>Destination IP Address:</strong> 192.168.0.20 (PC2)</li>
+                    <li><strong>Protocol:</strong> ICMP (1)</li>
+                    <li><strong>TTL (Time To Live):</strong> Generalmente 128 o 255</li>
+                    <li><strong>Packet Size:</strong> Dimensione del pacchetto IP</li>
+                </ul>
+                <div class="code-block">
+Esempio:
+SRC IP: 192.168.0.10
+DST IP: 192.168.0.20
+PROTOCOL: 1 (ICMP)
+TTL: 128
+                </div>
+            </div>
+
+            <h3>Layer 4 - Transport Layer</h3>
+            <div class="layer layer-4">
+                <p><strong>⚠️ Nota Importante:</strong> ICMP opera al Layer 3, quindi non troverai informazioni di Layer 4 (come porte TCP/UDP) per i pacchetti ping.</p>
+                <p>Se stessi analizzando traffico TCP o UDP, qui vedresti:</p>
+                <ul>
+                    <li>Source Port</li>
+                    <li>Destination Port</li>
+                    <li>Sequence Numbers (TCP)</li>
+                    <li>Acknowledgment Numbers (TCP)</li>
+                </ul>
+            </div>
+
+            <h3>Dati ICMP</h3>
+            <div class="layer">
+                <strong>Informazioni ICMP visualizzate:</strong>
+                <ul>
+                    <li><strong>Type:</strong> 
+                        <ul>
+                            <li>8 = Echo Request (ping in uscita)</li>
+                            <li>0 = Echo Reply (risposta al ping)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Code:</strong> 0 (per Echo Request/Reply)</li>
+                    <li><strong>Checksum:</strong> Valore di controllo dell'integrità</li>
+                    <li><strong>Identifier:</strong> ID del processo ping</li>
+                    <li><strong>Sequence Number:</strong> Numero sequenziale del pacchetto</li>
+                    <li><strong>Data:</strong> Payload del ping (solitamente dati casuali)</li>
+                </ul>
+                <div class="code-block">
+Esempio ICMP Echo Request:
+TYPE: 8 (Echo Request)
+CODE: 0
+IDENTIFIER: 1
+SEQUENCE: 1
+DATA: abcdefghijklmnopqrstuvwxyz
+                </div>
+            </div>
+        </div>
+
+        <!-- PASSO 11 -->
+        <div class="step">
+            <div>
+                <span class="step-number">11</span>
+                <span class="step-title">Analisi del Pacchetto ARP</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Torna all'Event List</li>
+                <li>Clicca su un evento <strong>ARP</strong> (uno dei primi nella lista)</li>
+                <li>Analizza il contenuto del pacchetto ARP nella finestra PDU Information</li>
+            </ol>
+            
+            <h3>Informazioni ARP</h3>
+            <div class="layer layer-2">
+                <strong>ARP Request (Broadcast):</strong>
+                <ul>
+                    <li><strong>Sender MAC Address:</strong> MAC di PC1</li>
+                    <li><strong>Sender IP Address:</strong> 192.168.0.10</li>
+                    <li><strong>Target MAC Address:</strong> 00:00:00:00:00:00 (sconosciuto)</li>
+                    <li><strong>Target IP Address:</strong> 192.168.0.20</li>
+                    <li><strong>Destination MAC (Frame):</strong> FF:FF:FF:FF:FF:FF (broadcast)</li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <strong>💡 Funzione di ARP:</strong> Prima di inviare il ping, PC1 deve scoprire l'indirizzo MAC fisico di PC2. ARP (Address Resolution Protocol) effettua questa risoluzione inviando una richiesta broadcast a tutti i dispositivi della rete.
+            </div>
+            
+            <div class="screenshot-placeholder">
+                📸 Screenshot: PDU Information di un pacchetto ARP Request
+            </div>
+        </div>
+
+        <!-- PASSO 12 -->
+        <div class="step">
+            <div>
+                <span class="step-number">12</span>
+                <span class="step-title">Visualizzazione del Percorso Completo</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Nel pannello Event List, usa il pulsante <strong>"Capture / Forward"</strong> per avanzare evento per evento</li>
+                <li>Osserva il percorso visivo del pacchetto sulla topologia:
+                    <ul>
+                        <li>PC1 → Switch (pacchetto in uscita)</li>
+                        <li>Switch → PC2 (inoltro del pacchetto)</li>
+                        <li>PC2 → Switch (risposta)</li>
+                        <li>Switch → PC1 (inoltro della risposta)</li>
+                    </ul>
+                </li>
+                <li>Nota come lo switch prende decisioni di forwarding basate sugli indirizzi MAC</li>
+            </ol>
+            
+            <div class="note">
+                <strong>📝 Comportamento dello Switch:</strong> Lo switch è un dispositivo Layer 2 che inoltra i frame basandosi sulla MAC Address Table. Inizialmente, con la tabella vuota, effettua flooding (invia a tutte le porte), poi impara gli indirizzi MAC e inoltra solo alla porta corretta.
+            </div>
+        </div>
+
+        <!-- PASSO 13 -->
+        <div class="step">
+            <div>
+                <span class="step-number">13</span>
+                <span class="step-title">Verifica del Risultato del Ping</span>
+            </div>
+            <p><strong>Azioni da compiere:</strong></p>
+            <ol>
+                <li>Clicca sul pulsante <strong>"Auto Capture / Play"</strong> per completare rapidamente la simulazione</li>
+                <li>Oppure continua a cliccare su "Capture / Forward" fino a quando tutti gli eventi sono stati processati</li>
+                <li>Torna alla finestra <strong>Command Prompt di PC1</strong></li>
+                <li>Clicca sul pulsante <strong>"Realtime"</strong> in basso a destra per tornare alla modalità normale</li>
+                <li>Verifica l'output del ping nel Command Prompt</li>
+            </ol>
+            
+            <div class="code-block">
+Output atteso:
+Pinging 192.168.0.20 with 32 bytes of data:
+
+Reply from 192.168.0.20: bytes=32 time<1ms TTL=128
+Reply from 192.168.0.20: bytes=32 time<1ms TTL=128
+Reply from 192.168.0.20: bytes=32 time<1ms TTL=128
+Reply from 192.168.0.20: bytes=32 time<1ms TTL=128
+
+Ping statistics for 192.168.0.20:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)
+            </div>
+            
+            <div class="screenshot-placeholder">
+                📸 Screenshot: Command Prompt con output del ping completato con successo
+            </div>
+        </div>
+
+        <h2>🔍 Struttura Completa del Pacchetto</h2>
+        
+        <div class="packet-structure">
+            <h3>Incapsulamento dei Dati (da Layer 7 a Layer 1)</h3>
+            
+            <div class="layer layer-4">
+                <strong>Layer 7-5: Application/Presentation/Session</strong><br>
+                Comando PING / Dati ICMP
+            </div>
+            
+            <div class="layer layer-4">
+                <strong>Layer 4: Transport</strong><br>
+                N/A per ICMP (ICMP è Layer 3)
+            </div>
+            
+            <div class="layer layer-3">
+                <strong>Layer 3: Network (IP Header)</strong><br>
+                • Source IP: 192.168.0.10<br>
+                • Destination IP: 192.168.0.20<br>
+                • Protocol: ICMP (1)<br>
+                • TTL: 128<br>
+                • Header Checksum<br>
+                <strong>+ ICMP Header:</strong><br>
+                • Type: 8 (Echo Request) o 0 (Echo Reply)<br>
+                • Code: 0<br>
+                • Checksum<br>
+                • Identifier & Sequence Number<br>
+                <strong>+ ICMP Data:</strong> Payload (32 bytes di dati)
+            </div>
+            
+            <div class="layer layer-2">
+                <strong>Layer 2: Data Link (Ethernet Frame)</strong><br>
+                • Destination MAC: MAC di PC2<br>
+                • Source MAC: MAC di PC1<br>
+                • EtherType: 0x0800 (IPv4)<br>
+                • [Payload: Pacchetto IP]<br>
+                • Frame Check Sequence (FCS)
+            </div>
+            
+            <div class="layer layer-1">
+                <strong>Layer 1: Physical</strong><br>
+                Segnali elettrici/ottici sul cavo Ethernet
+            </div>
+        </div>
+
+        <h2>📊 Tabella Riassuntiva dei Protocolli Osservati</h2>
+        
+        <table>
+            <tr>
+                <th>Protocollo</th>
+                <th>Layer OSI</th>
+                <th>Funzione</th>
+                <th>Informazioni Chiave</th>
+            </tr>
+            <tr>
+                <td><strong>Ethernet</strong></td>
+                <td>Layer 2 (Data Link)</td>
+                <td>Trasporto frame nella LAN</td>
+                <td>Indirizzi MAC sorgente e destinazione</td>
+            </tr>
+            <tr>
+                <td><strong>ARP</strong></td>
+                <td>Layer 2/3</td>
+                <td>Risoluzione IP → MAC</td>
+                <td>IP target, MAC target, broadcast</td>
+            </tr>
+            <tr>
+                <td><strong>IP</strong></td>
+                <td>Layer 3 (Network)</td>
+                <td>Indirizzamento e routing</td>
+                <td>IP sorgente, IP destinazione, TTL, protocol</td>
+            </tr>
+            <tr>
+                <td><strong>ICMP</strong></td>
+                <td>Layer 3 (Network)</td>
+                <td>Messaggi di controllo e diagnostica</td>
+                <td>Type (8=Request, 0=Reply), sequence number</td>
+            </tr>
+        </table>
+
+        <h2>🎓 Concetti Chiave da Ricordare</h2>
+        
+        <h3>1. Processo ARP</h3>
+        <p>Prima di qualsiasi comunicazione IP, è necessario conoscere l'indirizzo MAC del destinatario. Il protocollo ARP effettua questa risoluzione:</p>
+        <ul>
+            <li><strong>ARP Request:</strong> "Chi ha l'IP 192.168.0.20? Dimmi il tuo MAC!" (broadcast)</li>
+            <li><strong>ARP Reply:</strong> "Io ho l'IP 192.168.0.20, il mio MAC è XX:XX:XX:XX:XX:XX" (unicast)</li>
+        </ul>
+
+        <h3>2. Funzionamento del Ping (ICMP)</h3>
+        <ul>
+            <li><strong>Echo Request (Type 8):</strong> PC1 invia una richiesta a PC2 chiedendo "Sei raggiungibile?"</li>
+            <li><strong>Echo Reply (Type 0):</strong> PC2 risponde "Sì, sono qui!" con lo stesso payload ricevuto</li>
+            <li>Il sequence number aumenta ad ogni ping per tracciare le risposte</li>
+        </ul>
+
+        <h3>3. Ruolo dello Switch</h3>
+        <ul>
+            <li>Opera al <strong>Layer 2</strong> (Data Link)</li>
+            <li>Inoltra frame basandosi sugli <strong>indirizzi MAC</strong></li>
+            <li>Costruisce una <strong>MAC Address Table</strong> imparando da quali porte provengono i vari MAC</li>
+            <li>Effettua <strong>flooding</strong> (broadcast) se non conosce il MAC di destinazione</li>
+        </ul>
+
+        <h3>4. Incapsulamento</h3>
+        <p>Ogni layer aggiunge il proprio header ai dati ricevuti dal layer superiore:</p>
+        <div class="code-block">
+[Ethernet Header] [IP Header] [ICMP Header] [ICMP Data] [Ethernet Trailer]
+        </div>
+        <p>Questo processo è chiamato <strong>incapsulamento</strong>. Quando il pacchetto arriva a destinazione, ogni layer rimuove il proprio header (<strong>decapsulamento</strong>) e passa i dati al layer superiore.</p>
+
+        <h2>🚀 Esercizi Avanzati</h2>
+        
+        <div class="info-box">
+            <h3>Prova a fare quanto segue per approfondire:</h3>
+            <ol>
+                <li><strong>Aggiungi un terzo PC</strong> con IP 192.168.0.30 e osserva come lo switch gestisce il traffico tra tre dispositivi</li>
+                <li><strong>Configura un IP errato</strong> su PC2 (es. 192.168.1.20) e osserva cosa succede al ping - analizza il comportamento di ARP</li>
+                <li><strong>Sostituisci lo switch con un hub</strong> e osserva le differenze nel comportamento del traffico</li>
+                <li><strong>Aggiungi un router</strong> tra due subnet diverse (192.168.0.0/24 e 192.168.1.0/24) e analizza come cambia il percorso dei pacchetti</li>
+                <li><strong>Filtra solo ICMP</strong> ed esegui un ping continuo (<code>ping -t 192.168.0.20</code>) per osservare multiple sequenze di pacchetti</li>
+                <li><strong>Analizza la dimensione dei pacchetti</strong> cambiando la dimensione del ping con l'opzione <code>-l</code> (es. <code>ping -l 1000 192.168.0.20</code>)</li>
+            </ol>
+        </div>
+
+        <h2>❓ FAQ - Domande Frequenti</h2>
+        
+        <h3>Q: Perché il primo ping spesso fallisce?</h3>
+        <p><strong>A:</strong> Il primo ping può fallire perché la risoluzione ARP richiede tempo. Il primo pacchetto ICMP potrebbe essere inviato prima che ARP abbia completato la risoluzione dell'indirizzo MAC. I ping successivi riescono perché la entry ARP è già nella cache.</p>
+
+        <h3>Q: Cos'è il TTL e perché è importante?</h3>
+        <p><strong>A:</strong> TTL (Time To Live) è un contatore che viene decrementato ad ogni hop (passaggio attraverso un router). Quando raggiunge 0, il pacchetto viene scartato. Serve a prevenire loop infiniti nella rete.</p>
+
+        <h3>Q: Perché ICMP non ha porte come TCP o UDP?</h3>
+        <p><strong>A:</strong> ICMP è un protocollo Layer 3, non Layer 4. Le porte sono un concetto di Layer 4 (Transport) usato da TCP e UDP per multiplexing delle applicazioni. ICMP usa il campo "Type" per distinguere tra diversi tipi di messaggi.</p>
+
+        <h3>Q: Cosa succede se due PC hanno lo stesso IP?</h3>
+        <p><strong>A:</strong> Si verifica un <strong>conflitto IP</strong>. In Packet Tracer vedrai comportamenti imprevedibili e errori. In reti reali, i sistemi operativi rilevano il conflitto e possono disabilitare automaticamente la connessione di rete.</p>
+
+        <h3>Q: Come posso vedere la MAC Address Table dello switch?</h3>
+        <p><strong>A:</strong> Clicca sullo switch, vai alla scheda "CLI" e digita:
+            <div class="code-block">
+enable
+show mac address-table
+            </div>
+        </p>
+
+        <h2>📚 Risorse Aggiuntive</h2>
+        
+        <ul>
+            <li><strong>Documentazione Cisco Packet Tracer:</strong> <a href="https://www.netacad.com/courses/packet-tracer">NetAcad Packet Tracer</a></li>
+            <li><strong>RFC 792 (ICMP):</strong> Specifica tecnica del protocollo ICMP</li>
+            <li><strong>RFC 826 (ARP):</strong> Specifica tecnica del protocollo ARP</li>
+            <li><strong>Modello OSI:</strong> Studia approfonditamente i 7 layer del modello OSI</li>
+            <li><strong>Wireshark:</strong> Per analisi di pacchetti reali su reti fisiche</li>
+        </ul>
+
+        <div class="warning">
+            <strong>⚠️ Attenzione:</strong> Questo tutorial è pensato per scopi didattici in ambiente simulato. L'analisi di pacchetti su reti reali senza autorizzazione può violare leggi sulla privacy e sicurezza informatica.
+        </div>
+
+        <h2>✅ Conclusioni</h2>
+        
+        <p>Complimenti! Hai completato il tutorial sull'analisi dei pacchetti TCP/IP (ICMP) in Packet Tracer. Ora sei in grado di:</p>
+        
+        <ul>
+            <li>✓ Creare topologie di rete base in Packet Tracer</li>
+            <li>✓ Configurare indirizzi IP su dispositivi end-device</li>
+            <li>✓ Utilizzare la modalità simulazione per analizzare il traffico di rete</li>
+            <li>✓ Comprendere il funzionamento dei protocolli ARP e ICMP</li>
+            <li>✓ Analizzare la struttura dei pacchetti a diversi layer OSI</li>
+            <li>✓ Capire il processo di incapsulamento e decapsulamento</li>
+            <li>✓ Osservare il comportamento degli switch nella forwarding dei frame</li>
+        </ul>
+        
+        <p>Continua a sperimentare con Packet Tracer per consolidare le tue competenze di networking!</p>
+
+        <div class="footer">
+            <p><strong>Tutorial creato per scopi didattici</strong></p>
+            <p>© 2025 - Formazione Reti e Packet Tracer</p>
+            <p>Versione 1.0</p>
+        </div>
+    </div>
+</body>
+</html>
